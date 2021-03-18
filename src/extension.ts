@@ -89,7 +89,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async (e) => {
 		if (e.document.isUntitled && e.document.languageId === 'plaintext') {
 			const result = runModel(e.document.getText());
-			if (result.confidence >= 0.5) {
+			if (result.confidence >= 0.85) {
 				const langIds = await vscode.languages.getLanguages();
 				if (!langIds.some(l => l === result.languageId)) {
 					// The language isn't supported in VS Code
