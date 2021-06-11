@@ -1,8 +1,11 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as tf from '@tensorflow/tfjs-node';
-import { TFSavedModel } from '@tensorflow/tfjs-node/dist/saved_model';
+// Import @tensorflow/tfjs-core
+import * as tf from '@tensorflow/tfjs';
+// Adds the CPU backend to the global backend registry.
+import '@tensorflow/tfjs-backend-cpu';
+import * as path from 'path';
 
 enum ModelLangToLangId {
 	bat = 'bat',
@@ -55,18 +58,18 @@ interface ModelResult {
 	confidence: number;
 }
 
-let model: TFSavedModel | undefined;
+let modelCache: tf.GraphModel | undefined;
 
-function runModel(content: string): Array<ModelResult> {
+async function runModel(content: string): Promise<Array<ModelResult>> {
 	if (!content) {
 		return [];
 	}
 
 	// call out to the model
-	const predicted = model!.predict(tf.tensor([content]));
+	const predicted = await modelCache!.executeAsync(tf.tensor([content]));
 
-	const langs: Array<keyof typeof ModelLangToLangId> = (predicted as tf.Tensor<tf.Rank>[])[0].dataSync() as any;
-	const probabilities = (predicted as tf.Tensor<tf.Rank>[])[1].dataSync() as Float32Array;
+	const probabilities = (predicted as tf.Tensor<tf.Rank>[])[0].dataSync() as Float32Array;
+	const langs: Array<keyof typeof ModelLangToLangId> = (predicted as tf.Tensor<tf.Rank>[])[1].dataSync() as any;
 
 	const objs: Array<ModelResult> = [];
 	for (let i = 0; i < langs.length; i++) {
@@ -88,36 +91,36 @@ function runModel(content: string): Array<ModelResult> {
 	});
 }
 
-async function loadModel(modelFolder: string) {
+async function loadModel() {
+	await tf.setBackend('cpu');
 	try {
-		model = await tf.node.loadSavedModel(modelFolder, ['serve'], 'serving_default');
+		modelCache = await tf.loadGraphModel('https://storage.googleapis.com/tfjs-testing/guesslang-demo/model.json');
 	} catch (e) {
 		vscode.window.showErrorMessage(`Unable to load ML model: ${e}`);
 	}
 }
 
 export async function activate(context: vscode.ExtensionContext) {
-	const modelFolder = context.asAbsolutePath('model');
-	await loadModel(modelFolder);
+	await loadModel();
 
 	context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(async (e) => {
-		if (!model) {
-			await loadModel(modelFolder);
+		if (!modelCache) {
+			await loadModel();
 		}
 	}));
 
 	context.subscriptions.push(vscode.workspace.onDidCloseTextDocument((e) => {
 		if (!vscode.workspace.textDocuments.some(t => t.isUntitled && t.languageId === 'plaintext')) {
-			if(model) {
-				model.dispose();
-				model = undefined;
+			if(modelCache) {
+				modelCache.dispose();
+				modelCache = undefined;
 			}
 		}
 	}));
 
 	context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async (e) => {
 		if (e.document.isUntitled && e.document.languageId === 'plaintext') {
-			const modelResults = runModel(e.document.getText());
+			const modelResults = await runModel(e.document.getText());
 			if (!modelResults) {
 				return;
 			}
