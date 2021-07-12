@@ -188,10 +188,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.27.tgz#9db563937dd86915f69092bc43259d2f48578e41"
   integrity sha1-nbVjk33YaRX2kJK8QyWdL0hXjkE=
 
-"@types/vscode@^1.54.0":
-  version "1.54.0"
-  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.54.0.tgz#d28e3b3614054b2d6543c29412f60a986cabd9bb"
-  integrity sha512-sHHw9HG4bTrnKhLGgmEiOS88OLO/2RQytUN4COX9Djv81zc0FSZsSiYaVyjNidDzUSpXsySKBkZ31lk2/FbdCg==
+"@types/vscode@^1.55.0":
+  version "1.58.0"
+  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.58.0.tgz#91662aa27197c750df314e0d27de4b23512ebe59"
+  integrity sha512-enznxcBi4uYt20LWal09E0+VKEHZlq9PZawTu/mpWCVCFWWbiyR8HNI1ikBP1Ypqv8b3A/0md3DY1jcx+oQ8kQ==
 
 "@types/webgl-ext@0.0.30":
   version "0.0.30"
