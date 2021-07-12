@@ -24,8 +24,8 @@ export class ModelOperations {
         // call out to the model
         const predicted = await ModelOperations.modelCache!.executeAsync(tf.tensor([content]));
     
-        const probabilities = (predicted as tf.Tensor<tf.Rank>[])[0].dataSync() as Float32Array;
-        const langs: Array<keyof typeof ModelLangToLangId> = (predicted as tf.Tensor<tf.Rank>[])[1].dataSync() as any;
+        const langs: Array<keyof typeof ModelLangToLangId> = (predicted as tf.Tensor<tf.Rank>[])[0].dataSync() as any;
+        const probabilities = (predicted as tf.Tensor<tf.Rank>[])[1].dataSync() as Float32Array;
     
         const objs: Array<ModelResult> = [];
         for (let i = 0; i < langs.length; i++) {
